@@ -1,0 +1,457 @@
+```html
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Mes heures</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+
+    margin: 0;
+
+    padding: 30px;
+
+    font-family: Arial, sans-serif;
+
+    background: #f4f5f7;
+
+    color: #20242a;
+}
+
+.container {
+
+    max-width: 800px;
+
+    margin: auto;
+}
+
+.card {
+
+    background: white;
+
+    padding: 30px;
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 5px 20px rgba(0,0,0,0.1);
+
+    margin-bottom: 20px;
+}
+
+h1 {
+
+    text-align: center;
+
+    margin-top: 0;
+}
+
+.total {
+
+    text-align: center;
+
+    background: #20242a;
+
+    color: white;
+
+    border-radius: 15px;
+
+    padding: 25px;
+
+    margin: 20px 0;
+}
+
+.total span {
+
+    display: block;
+
+    font-size: 38px;
+
+    font-weight: bold;
+
+    margin-top: 8px;
+}
+
+table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+th,
+td {
+
+    padding: 14px 8px;
+
+    text-align: left;
+
+    border-bottom: 1px solid #eee;
+}
+
+th {
+
+    font-size: 14px;
+
+    color: #666;
+}
+
+.empty {
+
+    text-align: center;
+
+    color: #777;
+
+    padding: 30px;
+}
+
+.back {
+
+    display: block;
+
+    text-align: center;
+
+    text-decoration: none;
+
+    background: #f0f1f3;
+
+    color: #20242a;
+
+    padding: 15px;
+
+    border-radius: 12px;
+
+    font-weight: bold;
+
+    margin-top: 20px;
+}
+
+.delete {
+
+    display: block;
+
+    width: 100%;
+
+    margin-top: 20px;
+
+    padding: 14px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background: #eee;
+
+    color: #555;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+
+    body {
+        padding: 15px;
+    }
+
+    .card {
+        padding: 20px;
+    }
+
+    table {
+        font-size: 13px;
+    }
+
+    th,
+    td {
+        padding: 10px 4px;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<div class="card">
+
+<h1>📊 Mes heures</h1>
+
+<div class="total">
+
+Total travaillé
+
+<span id="total">
+00:00
+</span>
+
+</div>
+
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Date</th>
+
+<th>Arrivée</th>
+
+<th>Départ</th>
+
+<th>Pause</th>
+
+<th>Travail</th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="historique">
+
+</tbody>
+
+</table>
+
+
+<div id="vide" class="empty">
+
+Aucune journée enregistrée pour le moment.
+
+</div>
+
+
+<a
+href="index.html"
+class="back">
+
+← Retour à la pointeuse
+
+</a>
+
+
+<button
+class="delete"
+id="delete">
+
+🗑️ Effacer tout l'historique
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+<script>
+
+
+function formatHeure(timestamp) {
+
+    return new Date(timestamp)
+        .toLocaleTimeString(
+            "fr-FR",
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+}
+
+
+function formatDuree(milliseconds) {
+
+    let secondes =
+        Math.floor(milliseconds / 1000);
+
+    let heures =
+        Math.floor(secondes / 3600);
+
+    let minutes =
+        Math.floor(
+            (secondes % 3600) / 60
+        );
+
+    return String(heures).padStart(2,"0")
+        + ":"
+        + String(minutes).padStart(2,"0");
+}
+
+
+function afficherHistorique() {
+
+    let historique =
+
+        JSON.parse(
+
+            localStorage.getItem(
+                "mesHeures"
+            ) || "[]"
+
+        );
+
+
+    let tableau =
+        document.getElementById(
+            "historique"
+        );
+
+
+    let vide =
+        document.getElementById(
+            "vide"
+        );
+
+
+    let total = 0;
+
+
+    tableau.innerHTML = "";
+
+
+    if (historique.length === 0) {
+
+        vide.style.display = "block";
+
+        document.getElementById(
+            "total"
+        ).textContent = "00:00";
+
+        return;
+    }
+
+
+    vide.style.display = "none";
+
+
+    historique
+        .slice()
+        .reverse()
+        .forEach(function(jour) {
+
+
+            total += jour.travail;
+
+
+            let ligne =
+                document.createElement("tr");
+
+
+            let date =
+                document.createElement("td");
+
+            date.textContent =
+                jour.date;
+
+
+            let debut =
+                document.createElement("td");
+
+            debut.textContent =
+                formatHeure(jour.debut);
+
+
+            let fin =
+                document.createElement("td");
+
+            fin.textContent =
+                formatHeure(jour.fin);
+
+
+            let pause =
+                document.createElement("td");
+
+            pause.textContent =
+                formatDuree(jour.pause);
+
+
+            let travail =
+                document.createElement("td");
+
+            travail.textContent =
+                formatDuree(jour.travail);
+
+
+            ligne.appendChild(date);
+
+            ligne.appendChild(debut);
+
+            ligne.appendChild(fin);
+
+            ligne.appendChild(pause);
+
+            ligne.appendChild(travail);
+
+
+            tableau.appendChild(ligne);
+
+        });
+
+
+    document.getElementById(
+        "total"
+    ).textContent =
+        formatDuree(total);
+
+}
+
+
+document
+.getElementById("delete")
+.addEventListener(
+    "click",
+    function() {
+
+
+        if (
+            confirm(
+                "Voulez-vous vraiment supprimer tout votre historique ?"
+            )
+        ) {
+
+            localStorage.removeItem(
+                "mesHeures"
+            );
+
+            afficherHistorique();
+
+        }
+
+    }
+);
+
+
+afficherHistorique();
+
+
+</script>
+
+
+</body>
+
+</html>
+```
