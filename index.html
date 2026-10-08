@@ -8,7 +8,6 @@
 <title>Ma Pointeuse</title>
 
 <style>
-
 * {
     box-sizing: border-box;
 }
@@ -90,15 +89,25 @@ button:disabled {
     cursor: not-allowed;
 }
 
+.link {
+    display: block;
+    text-align: center;
+    margin-top: 25px;
+    padding: 15px;
+    border-radius: 12px;
+    background: #f0f1f3;
+    color: #20242a;
+    text-decoration: none;
+    font-weight: bold;
+}
+
 #message {
     text-align: center;
     margin-top: 25px;
     color: #666;
 }
-
 </style>
 </head>
-
 
 <body>
 
@@ -108,277 +117,59 @@ button:disabled {
 
 <h1>Ma Pointeuse</h1>
 
-<div id="clock">
-00:00:00
-</div>
+<div id="clock">00:00:00</div>
 
-<div id="status">
-Journée non commencée
-</div>
-
+<div id="status">Journée non commencée</div>
 
 <div class="buttons">
 
-<button id="start">
-▶️ Arrivée
-</button>
+<button id="start">▶️ Arrivée</button>
 
-<button id="pause" disabled>
-⏸️ Pause
-</button>
+<button id="pause" disabled>⏸️ Pause</button>
 
-<button id="resume" disabled>
-▶️ Reprendre
-</button>
+<button id="resume" disabled>▶️ Reprendre</button>
 
-<button id="stop" disabled>
-⏹️ Départ
-</button>
+<button id="stop" disabled>⏹️ Départ</button>
 
 </div>
-
 
 <div id="message">
 Clique sur « Arrivée » pour commencer.
 </div>
 
-</div>
+<a class="link" href="heures.html">
+📊 Voir mes heures
+</a>
 
 </div>
 
+</div>
 
 <script>
 
 let startTime = null;
-
 let pauseStart = null;
-
 let totalPause = 0;
-
 let timer = null;
-
 let state = "idle";
 
+const clock = document.getElementById("clock");
+const status = document.getElementById("status");
+const message = document.getElementById("message");
 
-const clock =
-document.getElementById("clock");
-
-const status =
-document.getElementById("status");
-
-const message =
-document.getElementById("message");
-
-const startButton =
-document.getElementById("start");
-
-const pauseButton =
-document.getElementById("pause");
-
-const resumeButton =
-document.getElementById("resume");
-
-const stopButton =
-document.getElementById("stop");
+const startButton = document.getElementById("start");
+const pauseButton = document.getElementById("pause");
+const resumeButton = document.getElementById("resume");
+const stopButton = document.getElementById("stop");
 
 
 function formatTime(milliseconds) {
 
-    let totalSeconds =
-        Math.floor(milliseconds / 1000);
+    let totalSeconds = Math.floor(milliseconds / 1000);
 
-    let hours =
-        Math.floor(totalSeconds / 3600);
+    let hours = Math.floor(totalSeconds / 3600);
 
-    let minutes =
-        Math.floor((totalSeconds % 3600) / 60);
+    let minutes = Math.floor((totalSeconds % 3600) / 60);
 
-    let seconds =
-        totalSeconds % 60;
-
-
-    return String(hours).padStart(2,"0")
-        + ":"
-        + String(minutes).padStart(2,"0")
-        + ":"
-        + String(seconds).padStart(2,"0");
-}
-
-
-function updateClock() {
-
-    if (!startTime) {
-        return;
-    }
-
-
-    let now = Date.now();
-
-    let pause = totalPause;
-
-
-    if (state === "paused") {
-
-        pause +=
-            now - pauseStart;
-
-    }
-
-
-    let worked =
-        now - startTime - pause;
-
-
-    clock.textContent =
-        formatTime(worked);
-}
-
-
-startButton.addEventListener(
-    "click",
-    function() {
-
-        startTime = Date.now();
-
-        totalPause = 0;
-
-        state = "working";
-
-        startButton.disabled = true;
-
-        pauseButton.disabled = false;
-
-        resumeButton.disabled = true;
-
-        stopButton.disabled = false;
-
-        status.textContent =
-            "🟢 Journée en cours";
-
-        message.textContent =
-            "La journée a commencé.";
-
-        timer =
-            setInterval(updateClock, 1000);
-
-        updateClock();
-
-    }
-);
-
-
-pauseButton.addEventListener(
-    "click",
-    function() {
-
-        if (state !== "working") {
-            return;
-        }
-
-        pauseStart = Date.now();
-
-        state = "paused";
-
-        pauseButton.disabled = true;
-
-        resumeButton.disabled = false;
-
-        status.textContent =
-            "🟠 En pause";
-
-        message.textContent =
-            "Le temps de pause n'est pas comptabilisé.";
-
-    }
-);
-
-
-resumeButton.addEventListener(
-    "click",
-    function() {
-
-        if (state !== "paused") {
-            return;
-        }
-
-        totalPause +=
-            Date.now() - pauseStart;
-
-        pauseStart = null;
-
-        state = "working";
-
-        pauseButton.disabled = false;
-
-        resumeButton.disabled = true;
-
-        status.textContent =
-            "🟢 Journée en cours";
-
-        message.textContent =
-            "Le travail a repris.";
-
-    }
-);
-
-
-stopButton.addEventListener(
-    "click",
-    function() {
-
-        if (
-            state !== "working" &&
-            state !== "paused"
-        ) {
-            return;
-        }
-
-
-        let now = Date.now();
-
-
-        if (state === "paused") {
-
-            totalPause +=
-                now - pauseStart;
-
-        }
-
-
-        let worked =
-            now - startTime - totalPause;
-
-
-        clearInterval(timer);
-
-        state = "finished";
-
-
-        clock.textContent =
-            formatTime(worked);
-
-
-        startButton.disabled = true;
-
-        pauseButton.disabled = true;
-
-        resumeButton.disabled = true;
-
-        stopButton.disabled = true;
-
-
-        status.textContent =
-            "🔴 Journée terminée";
-
-        message.textContent =
-            "Temps travaillé : "
-            + formatTime(worked);
-
-    }
-);
-
-</script>
-
-</body>
-</html>
+    let seconds = totalSeconds % 60;
 ```
