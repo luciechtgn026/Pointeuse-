@@ -1,929 +1,380 @@
 ```html
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#20242a">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Ma Pointeuse</title>
 
 <style>
+
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 body {
-  margin: 0;
-  background: #f4f5f7;
-  color: #20242a;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    margin: 0;
+    padding: 30px;
+    font-family: Arial, sans-serif;
+    background: #f4f5f7;
+    color: #20242a;
 }
 
-header {
-  background: #20242a;
-  color: white;
-  padding: 22px;
-  text-align: center;
-}
-
-header h1 {
-  margin: 0;
-  font-size: 28px;
-}
-
-header p {
-  margin: 6px 0 0;
-  opacity: 0.7;
-}
-
-main {
-  max-width: 700px;
-  margin: 30px auto;
-  padding: 0 18px;
+.container {
+    max-width: 600px;
+    margin: auto;
 }
 
 .card {
-  background: white;
-  border-radius: 18px;
-  padding: 25px;
-  margin-bottom: 20px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
 }
 
-.date {
-  text-align: center;
-  font-size: 18px;
-  color: #666;
-  margin-bottom: 15px;
+h1 {
+    text-align: center;
 }
 
-.timer {
-  text-align: center;
-  font-size: 55px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  margin: 15px 0 25px;
+#clock {
+    text-align: center;
+    font-size: 55px;
+    font-weight: bold;
+    margin: 30px 0;
 }
 
-.status {
-  text-align: center;
-  font-weight: 600;
-  margin-bottom: 20px;
+#status {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 18px;
 }
 
 .buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 button {
-  border: 0;
-  border-radius: 12px;
-  padding: 16px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.1s, opacity 0.2s;
+    width: 100%;
+    padding: 18px;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
 }
 
-button:active {
-  transform: scale(0.97);
+#start {
+    background: #20242a;
+    color: white;
+}
+
+#pause {
+    background: #ddd;
+}
+
+#resume {
+    background: #20242a;
+    color: white;
+}
+
+#stop {
+    background: #d9534f;
+    color: white;
 }
 
 button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+    opacity: 0.35;
+    cursor: not-allowed;
 }
 
-.start {
-  background: #20242a;
-  color: white;
+#message {
+    text-align: center;
+    margin-top: 25px;
+    color: #666;
 }
 
-.pause {
-  background: #e7e9ec;
-  color: #20242a;
-}
-
-.resume {
-  background: #20242a;
-  color: white;
-}
-
-.stop {
-  background: #d9534f;
-  color: white;
-}
-
-.reset {
-  width: 100%;
-  background: transparent;
-  color: #777;
-  border: 1px solid #ddd;
-  margin-top: 10px;
-}
-
-.summary {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-}
-
-.summary-box {
-  background: #f4f5f7;
-  border-radius: 12px;
-  padding: 18px;
-  text-align: center;
-}
-
-.summary-box strong {
-  display: block;
-  font-size: 24px;
-  margin-top: 5px;
-}
-
-.history {
-  margin-top: 10px;
-}
-
-.history-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.history-row:last-child {
-  border-bottom: 0;
-}
-
-.small {
-  color: #777;
-  font-size: 14px;
-}
-
-@media (max-width: 500px) {
-  .timer {
-    font-size: 42px;
-  }
-
-  .buttons {
-    grid-template-columns: 1fr;
-  }
-}
 </style>
 </head>
 
+
 <body>
 
-<header>
-  <h1>Ma Pointeuse</h1>
-  <p>Suivi de mon temps de travail</p>
-</header>
+<div class="container">
 
-<main>
+<div class="card">
 
-  <div class="card">
+<h1>Ma Pointeuse</h1>
 
-    <div class="date" id="date"></div>
+<div id="clock">
+00:00:00
+</div>
 
-    <div class="timer" id="timer">
-      00:00:00
-    </div>
-
-    <div class="status" id="status">
-      Journée non commencée
-    </div>
-
-    <div class="buttons">
-
-      <button
-        id="startBtn"
-        class="start"
-        onclick="startWork()">
-        ▶️ Arrivée
-      </button>
-
-      <button
-        id="pauseBtn"
-        class="pause"
-        onclick="pauseWork()"
-        disabled>
-        ⏸️ Pause
-      </button>
-
-      <button
-        id="resumeBtn"
-        class="resume"
-        onclick="resumeWork()"
-        disabled>
-        ▶️ Reprendre
-      </button>
-
-      <button
-        id="stopBtn"
-        class="stop"
-        onclick="stopWork()"
-        disabled>
-        ⏹️ Départ
-      </button>
-
-    </div>
-
-    <button
-      class="reset"
-      onclick="resetDay()">
-      Réinitialiser la journée
-    </button>
-
-  </div>
+<div id="status">
+Journée non commencée
+</div>
 
 
-  <div class="card">
+<div class="buttons">
 
-    <h2>Résumé</h2>
+<button id="start">
+▶️ Arrivée
+</button>
 
-    <div class="summary">
+<button id="pause" disabled>
+⏸️ Pause
+</button>
 
-      <div class="summary-box">
-        Arrivée
-        <strong id="arrival">--:--</strong>
-      </div>
+<button id="resume" disabled>
+▶️ Reprendre
+</button>
 
-      <div class="summary-box">
-        Départ
-        <strong id="departure">--:--</strong>
-      </div>
+<button id="stop" disabled>
+⏹️ Départ
+</button>
 
-      <div class="summary-box">
-        Temps travaillé
-        <strong id="worked">00:00</strong>
-      </div>
-
-      <div class="summary-box">
-        Temps en pause
-        <strong id="breakTime">00:00</strong>
-      </div>
-
-    </div>
-
-  </div>
+</div>
 
 
-  <div class="card">
+<div id="message">
+Clique sur « Arrivée » pour commencer.
+</div>
 
-    <h2>Historique</h2>
+</div>
 
-    <div id="history" class="history">
-      <div class="small">
-        Aucune journée enregistrée.
-      </div>
-    </div>
-
-  </div>
-
-</main>
+</div>
 
 
 <script>
 
-let state = {
-  status: "idle",
+let startTime = null;
 
-  startTime: null,
-  pauseStart: null,
+let pauseStart = null;
 
-  totalPause: 0,
+let totalPause = 0;
 
-  workedTime: 0,
+let timer = null;
 
-  endTime: null
-};
-
-let timerInterval = null;
+let state = "idle";
 
 
-/* =========================
-   DATE
-========================= */
+const clock =
+document.getElementById("clock");
 
-function updateDate() {
+const status =
+document.getElementById("status");
 
-  const now = new Date();
+const message =
+document.getElementById("message");
 
-  document.getElementById("date").textContent =
-    now.toLocaleDateString("fr-FR", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric"
-    });
+const startButton =
+document.getElementById("start");
 
+const pauseButton =
+document.getElementById("pause");
+
+const resumeButton =
+document.getElementById("resume");
+
+const stopButton =
+document.getElementById("stop");
+
+
+function formatTime(milliseconds) {
+
+    let totalSeconds =
+        Math.floor(milliseconds / 1000);
+
+    let hours =
+        Math.floor(totalSeconds / 3600);
+
+    let minutes =
+        Math.floor((totalSeconds % 3600) / 60);
+
+    let seconds =
+        totalSeconds % 60;
+
+
+    return String(hours).padStart(2,"0")
+        + ":"
+        + String(minutes).padStart(2,"0")
+        + ":"
+        + String(seconds).padStart(2,"0");
 }
 
 
-/* =========================
-   FORMATAGE DU TEMPS
-========================= */
+function updateClock() {
 
-function formatTime(seconds) {
-
-  seconds = Math.max(0, Math.floor(seconds));
-
-  const hours = Math.floor(seconds / 3600);
-
-  const minutes = Math.floor((seconds % 3600) / 60);
-
-  const secs = seconds % 60;
-
-  return (
-    String(hours).padStart(2, "0") +
-    ":" +
-    String(minutes).padStart(2, "0") +
-    ":" +
-    String(secs).padStart(2, "0")
-  );
-
-}
-
-
-function formatShortTime(seconds) {
-
-  seconds = Math.max(0, Math.floor(seconds));
-
-  const hours = Math.floor(seconds / 3600);
-
-  const minutes = Math.floor((seconds % 3600) / 60);
-
-  return (
-    String(hours).padStart(2, "0") +
-    ":" +
-    String(minutes).padStart(2, "0")
-  );
-
-}
-
-
-/* =========================
-   HEURE
-========================= */
-
-function formatClock(timestamp) {
-
-  if (!timestamp) {
-    return "--:--";
-  }
-
-  return new Date(timestamp).toLocaleTimeString(
-    "fr-FR",
-    {
-      hour: "2-digit",
-      minute: "2-digit"
+    if (!startTime) {
+        return;
     }
-  );
 
-}
 
+    let now = Date.now();
 
-/* =========================
-   DÉMARRER
-========================= */
+    let pause = totalPause;
 
-function startWork() {
 
-  if (state.status !== "idle") {
-    return;
-  }
+    if (state === "paused") {
 
-  state.status = "working";
-
-  state.startTime = Date.now();
-
-  state.pauseStart = null;
-
-  state.totalPause = 0;
-
-  state.workedTime = 0;
-
-  state.endTime = null;
-
-  saveState();
-
-  updateInterface();
-
-  startTimer();
-
-}
-
-
-/* =========================
-   PAUSE
-========================= */
-
-function pauseWork() {
-
-  if (state.status !== "working") {
-    return;
-  }
-
-  state.status = "paused";
-
-  state.pauseStart = Date.now();
-
-  saveState();
-
-  updateInterface();
-
-}
-
-
-/* =========================
-   REPRENDRE
-========================= */
-
-function resumeWork() {
-
-  if (state.status !== "paused") {
-    return;
-  }
-
-  if (state.pauseStart) {
-
-    state.totalPause +=
-      Date.now() - state.pauseStart;
-
-  }
-
-  state.pauseStart = null;
-
-  state.status = "working";
-
-  saveState();
-
-  updateInterface();
-
-}
-
-
-/* =========================
-   TERMINER
-========================= */
-
-function stopWork() {
-
-  if (
-    state.status !== "working" &&
-    state.status !== "paused"
-  ) {
-    return;
-  }
-
-  if (state.status === "paused") {
-
-    state.totalPause +=
-      Date.now() - state.pauseStart;
-
-    state.pauseStart = null;
-
-  }
-
-  state.endTime = Date.now();
-
-  state.workedTime =
-    state.endTime -
-    state.startTime -
-    state.totalPause;
-
-  state.status = "finished";
-
-  stopTimer();
-
-  saveState();
-
-  saveHistory();
-
-  updateInterface();
-
-}
-
-
-/* =========================
-   TIMER
-========================= */
-
-function startTimer() {
-
-  stopTimer();
-
-  timerInterval = setInterval(
-    updateTimer,
-    1000
-  );
-
-  updateTimer();
-
-}
-
-
-function stopTimer() {
-
-  if (timerInterval) {
-
-    clearInterval(timerInterval);
-
-    timerInterval = null;
-
-  }
-
-}
-
-
-function updateTimer() {
-
-  if (!state.startTime) {
-    return;
-  }
-
-  let end = Date.now();
-
-  let pause = state.totalPause;
-
-  if (
-    state.status === "paused" &&
-    state.pauseStart
-  ) {
-
-    pause +=
-      end - state.pauseStart;
-
-  }
-
-  let worked =
-    end -
-    state.startTime -
-    pause;
-
-  document.getElementById("timer").textContent =
-    formatTime(worked / 1000);
-
-}
-
-
-/* =========================
-   INTERFACE
-========================= */
-
-function updateInterface() {
-
-  const startBtn =
-    document.getElementById("startBtn");
-
-  const pauseBtn =
-    document.getElementById("pauseBtn");
-
-  const resumeBtn =
-    document.getElementById("resumeBtn");
-
-  const stopBtn =
-    document.getElementById("stopBtn");
-
-  const status =
-    document.getElementById("status");
-
-
-  startBtn.disabled =
-    state.status !== "idle";
-
-  pauseBtn.disabled =
-    state.status !== "working";
-
-  resumeBtn.disabled =
-    state.status !== "paused";
-
-  stopBtn.disabled =
-    !(
-      state.status === "working" ||
-      state.status === "paused"
-    );
-
-
-  if (state.status === "idle") {
-
-    status.textContent =
-      "Journée non commencée";
-
-  }
-
-  if (state.status === "working") {
-
-    status.textContent =
-      "🟢 Journée en cours";
-
-  }
-
-  if (state.status === "paused") {
-
-    status.textContent =
-      "🟠 En pause";
-
-  }
-
-  if (state.status === "finished") {
-
-    status.textContent =
-      "🔴 Journée terminée";
-
-  }
-
-
-  document.getElementById("arrival").textContent =
-    formatClock(state.startTime);
-
-  document.getElementById("departure").textContent =
-    formatClock(state.endTime);
-
-
-  let worked = 0;
-
-  if (state.startTime) {
-
-    let end =
-      state.endTime || Date.now();
-
-    let pause =
-      state.totalPause;
-
-    if (
-      state.status === "paused" &&
-      state.pauseStart
-    ) {
-
-      pause +=
-        Date.now() - state.pauseStart;
+        pause +=
+            now - pauseStart;
 
     }
 
-    worked =
-      end -
-      state.startTime -
-      pause;
 
-  }
+    let worked =
+        now - startTime - pause;
 
 
-  document.getElementById("worked").textContent =
-    formatShortTime(worked / 1000);
-
-
-  let pauseSeconds =
-    state.totalPause / 1000;
-
-  if (
-    state.status === "paused" &&
-    state.pauseStart
-  ) {
-
-    pauseSeconds +=
-      (Date.now() - state.pauseStart) / 1000;
-
-  }
-
-  document.getElementById("breakTime").textContent =
-    formatShortTime(pauseSeconds);
-
-
-  if (state.status === "finished") {
-
-    document.getElementById("timer").textContent =
-      formatTime(state.workedTime / 1000);
-
-  }
-
+    clock.textContent =
+        formatTime(worked);
 }
 
 
-/* =========================
-   SAUVEGARDE
-========================= */
+startButton.addEventListener(
+    "click",
+    function() {
 
-function saveState() {
+        startTime = Date.now();
 
-  localStorage.setItem(
-    "pointeuseState",
-    JSON.stringify(state)
-  );
+        totalPause = 0;
 
-}
+        state = "working";
 
+        startButton.disabled = true;
 
-function loadState() {
+        pauseButton.disabled = false;
 
-  const saved =
-    localStorage.getItem(
-      "pointeuseState"
-    );
+        resumeButton.disabled = true;
 
-  if (saved) {
+        stopButton.disabled = false;
 
-    try {
+        status.textContent =
+            "🟢 Journée en cours";
 
-      state =
-        JSON.parse(saved);
+        message.textContent =
+            "La journée a commencé.";
 
-    } catch {
+        timer =
+            setInterval(updateClock, 1000);
 
-      state = {
-        status: "idle",
-        startTime: null,
-        pauseStart: null,
-        totalPause: 0,
-        workedTime: 0,
-        endTime: null
-      };
+        updateClock();
 
     }
+);
 
-  }
 
-}
+pauseButton.addEventListener(
+    "click",
+    function() {
 
+        if (state !== "working") {
+            return;
+        }
 
-/* =========================
-   HISTORIQUE
-========================= */
+        pauseStart = Date.now();
 
-function saveHistory() {
+        state = "paused";
 
-  let history =
-    JSON.parse(
-      localStorage.getItem(
-        "pointeuseHistory"
-      ) || "[]"
-    );
+        pauseButton.disabled = true;
 
+        resumeButton.disabled = false;
 
-  const day = {
+        status.textContent =
+            "🟠 En pause";
 
-    date:
-      new Date(
-        state.startTime
-      ).toLocaleDateString(
-        "fr-FR"
-      ),
+        message.textContent =
+            "Le temps de pause n'est pas comptabilisé.";
 
-    arrival:
-      formatClock(
-        state.startTime
-      ),
+    }
+);
 
-    departure:
-      formatClock(
-        state.endTime
-      ),
 
-    worked:
-      formatShortTime(
-        state.workedTime / 1000
-      )
+resumeButton.addEventListener(
+    "click",
+    function() {
 
-  };
+        if (state !== "paused") {
+            return;
+        }
 
+        totalPause +=
+            Date.now() - pauseStart;
 
-  history.unshift(day);
+        pauseStart = null;
 
-  history =
-    history.slice(0, 30);
+        state = "working";
 
-  localStorage.setItem(
-    "pointeuseHistory",
-    JSON.stringify(history)
-  );
+        pauseButton.disabled = false;
 
-  displayHistory();
+        resumeButton.disabled = true;
 
-}
+        status.textContent =
+            "🟢 Journée en cours";
 
+        message.textContent =
+            "Le travail a repris.";
 
-function displayHistory() {
+    }
+);
 
-  const container =
-    document.getElementById(
-      "history"
-    );
 
-  const history =
-    JSON.parse(
-      localStorage.getItem(
-        "pointeuseHistory"
-      ) || "[]"
-    );
+stopButton.addEventListener(
+    "click",
+    function() {
 
+        if (
+            state !== "working" &&
+            state !== "paused"
+        ) {
+            return;
+        }
 
-  if (!history.length) {
 
-    container.innerHTML =
-      '<div class="small">Aucune journée enregistrée.</div>';
+        let now = Date.now();
 
-    return;
 
-  }
+        if (state === "paused") {
 
+            totalPause +=
+                now - pauseStart;
 
-  container.innerHTML =
-    history.map(day => `
+        }
 
-      <div class="history-row">
 
-        <div>
+        let worked =
+            now - startTime - totalPause;
 
-          <strong>${day.date}</strong>
 
-          <div class="small">
-            ${day.arrival} → ${day.departure}
-          </div>
+        clearInterval(timer);
 
-        </div>
+        state = "finished";
 
-        <strong>
-          ${day.worked}
-        </strong>
 
-      </div>
+        clock.textContent =
+            formatTime(worked);
 
-    `).join("");
 
-}
+        startButton.disabled = true;
 
+        pauseButton.disabled = true;
 
-/* =========================
-   RÉINITIALISER
-========================= */
+        resumeButton.disabled = true;
 
-function resetDay() {
+        stopButton.disabled = true;
 
-  const confirmation =
-    confirm(
-      "Réinitialiser la journée en cours ?"
-    );
 
-  if (!confirmation) {
-    return;
-  }
+        status.textContent =
+            "🔴 Journée terminée";
 
-  stopTimer();
+        message.textContent =
+            "Temps travaillé : "
+            + formatTime(worked);
 
-  state = {
-
-    status: "idle",
-
-    startTime: null,
-
-    pauseStart: null,
-
-    totalPause: 0,
-
-    workedTime: 0,
-
-    endTime: null
-
-  };
-
-  saveState();
-
-  updateInterface();
-
-}
-
-
-/* =========================
-   INITIALISATION
-========================= */
-
-updateDate();
-
-loadState();
-
-updateInterface();
-
-displayHistory();
-
-
-if (
-  state.status === "working"
-) {
-
-  startTimer();
-
-}
-
-
-/* Mise à jour toutes les secondes */
-
-setInterval(
-  updateInterface,
-  1000
+    }
 );
 
 </script>
